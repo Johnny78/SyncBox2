@@ -11,8 +11,15 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.Security;
+
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 
 import org.apache.commons.io.IOUtils;
+
+import com.sun.net.ssl.internal.ssl.Provider;
 
 
 public class SyncBoxServer {
@@ -27,16 +34,23 @@ public class SyncBoxServer {
 	DataInputStream dis;
 	DataOutputStream outToClient;
 	BufferedReader inFromClient;
-	ServerSocket welcomeSocket;
-	Socket clientSocket;
+	SSLServerSocket welcomeSocket;
+	SSLSocket clientSocket;
 	public void run (int port) throws Exception{
-
 		boolean serving = true;
-		welcomeSocket = new ServerSocket(port);
+		// Registering the JSSE provider
+		Security.addProvider(new Provider());
+
+		//Specifying the Keystore details
+		System.setProperty("javax.net.ssl.keyStore","syncboxKey.jks");
+		System.setProperty("javax.net.ssl.keyStorePassword","password");
+		
+		SSLServerSocketFactory sslServerSocketfactory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();	
+		welcomeSocket = (SSLServerSocket)sslServerSocketfactory.createServerSocket(port);
 		while (serving){
 			System.out.println("*************");
 			System.out.println("Serving...");
-			clientSocket = welcomeSocket.accept();
+			clientSocket = (SSLSocket)welcomeSocket.accept();
 			System.out.println("Client connected");
 
 			outToClient = new DataOutputStream(clientSocket.getOutputStream());

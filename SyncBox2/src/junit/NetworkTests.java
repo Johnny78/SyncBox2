@@ -138,7 +138,7 @@ public class NetworkTests {
 		assertTrue(new File(Path.TEMP+Path.SERVER_METADATA).exists() && new File("testfilesystem\\server\\"+Path.SERVER_METADATA).exists());
 		Thread.sleep(100);
 		assertEquals(new File(Path.TEMP+Path.SERVER_METADATA).length(), new File("testfilesystem\\server\\"+Path.SERVER_METADATA).length());
-		deleteMetadata();
+		//deleteMetadata();
 	}
 
 }

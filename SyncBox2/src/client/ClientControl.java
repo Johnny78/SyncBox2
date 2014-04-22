@@ -6,9 +6,10 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Socket;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,8 +17,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.crypto.SecretKey;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.io.IOUtils;
+
+import com.sun.net.ssl.internal.ssl.Provider;
 
 import client.constants.ActionType;
 import client.constants.Path;
@@ -33,12 +38,12 @@ import client.security.PasswordBasedEncryption;
  */
 public class ClientControl {
 
-	private char[] masterPassword;
+	private char[] masterPassword = "soup".toCharArray();
 
-	//private static final String serverAddress = "localhost";
-	private static final String serverAddress = "syncbox.no-ip.biz";
+	private static final String serverAddress = "localhost";
+	//private static final String serverAddress = "syncbox.no-ip.biz";
 	private static final int serverPort = 20661;
-	private Socket clientSocket;
+	private SSLSocket clientSocket;
 	private DataOutputStream outToServer;
 	private DataInputStream dis;
 	private BufferedReader inFromServer;
@@ -52,6 +57,7 @@ public class ClientControl {
 	 * @throws Exception
 	 */
 	public ClientControl() throws Exception{
+		
 		if (!isOnServer(Path.SERVER_METADATA)){
 			initialise();
 		}
@@ -70,8 +76,9 @@ public class ClientControl {
 	 * 
 	 * @param password
 	 */
-	public void synchronise(char[] password){
-		masterPassword = password;
+	public void synchronise(){
+		System.out.println("Synchronising folders");
+		//masterPassword = password;
 		HashMap<FileMetadata, ActionType> actions = compareMetadata();
 		sync(actions);
 		//nullify password
@@ -81,8 +88,10 @@ public class ClientControl {
 	 * sets up a TCP connection with server
 	 */
 	public void connect(){
-		try{	
-			clientSocket = new Socket(serverAddress, serverPort);
+		try {
+			Security.addProvider(new Provider());
+			SSLSocketFactory sslsocketfactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
+			clientSocket = (SSLSocket)sslsocketfactory.createSocket(serverAddress, serverPort);
 			System.out.println("Connecting...");
 			outToServer = new DataOutputStream(clientSocket.getOutputStream());
 			inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -151,7 +160,7 @@ public class ClientControl {
 	 * @param fileName
 	 */
 	public void recieveFile(String fileName){
-		try{
+		try{		
 			connect();
 			outToServer.writeBytes("send file\n");
 			inFromServer.readLine();
@@ -166,6 +175,7 @@ public class ClientControl {
 			recieveFile(f);
 			System.out.println("file "+ f.getName()+" recieved "+f.length()+"\n\n");
 			quickDisconnect();
+			
 		}
 		catch (Exception e){
 			e.printStackTrace();
@@ -191,7 +201,7 @@ public class ClientControl {
 			System.out.println("No such File");
 		}
 		else{
-			try {
+			try {				
 				connect();
 				System.out.println("Sending File...");
 				outToServer.writeBytes("recieve file\n");				
@@ -303,8 +313,8 @@ public class ClientControl {
 				MetadataTool.writeArray(resultList, Path.CLIENT + Path.SERVER_METADATA);
 				MetadataTool.writeArray(deletedList, Path.CLIENT+Path.DELETED_METADATA);
 				updateServerMetadata();
-				clearTempFile();
 			}
+			clearTempFile();
 		}	
 	}
 
@@ -315,8 +325,8 @@ public class ClientControl {
 	 * @return a list of actions needed to synchronise
 	 */
 	public HashMap<FileMetadata, ActionType> compareMetadata(){
-		getServerMetadata();
-		MetadataTool.updateClientMetadata();	;		
+		MetadataTool.updateClientMetadata();
+		getServerMetadata();	
 		HashMap<FileMetadata, ActionType> actions = MetadataTool.compare();
 		return actions;
 	}
@@ -324,8 +334,8 @@ public class ClientControl {
 	public void getServerMetadata(){						
 		recieveFile(Path.SERVER_METADATA);
 		recieveFile(Path.DELETED_METADATA);
-		decrypt(Path.SERVER_METADATA, Path.SERVER_METADATA, masterPassword);
-		decrypt(Path.DELETED_METADATA, Path.DELETED_METADATA, masterPassword);
+		decrypt(Path.SERVER_METADATA, Path.CLIENT + Path.SERVER_METADATA, masterPassword);
+		decrypt(Path.DELETED_METADATA, Path.CLIENT + Path.DELETED_METADATA, masterPassword);
 	}
 
 	public void updateServerMetadata(){
@@ -380,6 +390,7 @@ public class ClientControl {
 		MetadataTool.writeArray(MetadataTool.readArray(Path.CLIENT + Path.CLIENT_METADATA), Path.CLIENT + Path.CLIENT_METADATA);
 		MetadataTool.writeArray(MetadataTool.readArray(Path.CLIENT + Path.SERVER_METADATA), Path.CLIENT + Path.SERVER_METADATA);
 		MetadataTool.writeArray(MetadataTool.readArray(Path.CLIENT + Path.DELETED_METADATA), Path.CLIENT + Path.DELETED_METADATA);
+		MetadataTool.writeArray(MetadataTool.readArray(Path.CLIENT + Path.SEEN_METADATA), Path.CLIENT + Path.SEEN_METADATA);
 		updateServerMetadata();
 	}
 	

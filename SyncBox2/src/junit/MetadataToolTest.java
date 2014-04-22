@@ -103,19 +103,22 @@ public class MetadataToolTest {
 		deleteTestFiles();
 	}
 
-//	@Ignore	//old test
-//	public void testCompareEqualMetaData() {
-//		createTestFile();
-//		ArrayList<FileMetadata> li = new ArrayList<FileMetadata>();
-//		ArrayList<FileMetadata> deleted = new ArrayList<FileMetadata>();
-//		FileMetadata fm = MetadataTool.generateMetadata("myFile.txt");
-//		li.add(fm);
-//		MetadataTool.writeArray(li, Path.CLIENT + Path.SERVER_METADATA);
-//		ArrayList<FileMetadata> deserialised = MetadataTool.readArray(Path.CLIENT + Path.SERVER_METADATA);	
-//		Map<FileMetadata, ActionType> map = MetadataTool.compare(li, deserialised, deleted);
-//		assertTrue(map.get(fm).name().equals("UNCHANGED"));
-//		deleteTestFiles();
-//	}
+	@Test
+	public void testCompareEqualMetaData() {
+		createTestFile();
+		ArrayList<FileMetadata> li = new ArrayList<FileMetadata>();
+		ArrayList<FileMetadata> deleted = new ArrayList<FileMetadata>();
+		FileMetadata fm = MetadataTool.generateMetadata("myFile.txt");
+		li.add(fm);
+		MetadataTool.writeArray(li, Path.CLIENT + Path.SERVER_METADATA);
+		MetadataTool.writeArray(deleted, Path.CLIENT + Path.DELETED_METADATA);
+		
+		ArrayList<FileMetadata> deserialised = MetadataTool.readArray(Path.CLIENT + Path.SERVER_METADATA);	
+		MetadataTool.writeArray(deserialised, Path.CLIENT + Path.CLIENT_METADATA);
+		Map<FileMetadata, ActionType> map = MetadataTool.compare();
+		assertTrue(map.get(fm).name().equals("UNCHANGED"));
+		deleteTestFiles();
+	}
 
 //	@Ignore	//old test
 //	public void testCompareDiffMetaData() {

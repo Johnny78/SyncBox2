@@ -131,8 +131,7 @@ public class MetadataTool {
 	public static void updateClientMetadata(){
 		ArrayList<FileMetadata> seenFiles = readArray(Path.CLIENT + Path.SEEN_METADATA);
 		ArrayList<FileMetadata> clientMeta = new ArrayList<FileMetadata>();
-		
-				
+					
 		File syncBox = new File(Path.SYNCBOX);
 		File[] files = syncBox.listFiles();        
 		for (File f : files){

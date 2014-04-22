@@ -18,6 +18,6 @@ public class SyncronisationTests {
 	@Test
 	public void testSynchronise() throws Exception {
 		ClientControl cc = new ClientControl();
-		cc.synchronise("password".toCharArray());
+		cc.synchronise();
 	}
 }

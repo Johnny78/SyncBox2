@@ -101,10 +101,10 @@ public class ClientControlTest {
 		SecretKey key = client.security.PasswordBasedEncryption.genPass();
 		cc.encrypt(Path.SYNCBOX+NAME, "encrypted.test", key);
 		File f = new File(Path.SYNCBOX + NAME);
-		cc.decrypt("encrypted.test", "myfile2", key);
+		cc.decrypt("encrypted.test", Path.SYNCBOX + "myfile2", key);
 		System.out.println(f.length());
 		System.out.println(new File(Path.SYNCBOX + "myfile2").length());
-		assertTrue(f.length() == new File("myfile2").length());
+		assertTrue(f.length() == new File(Path.SYNCBOX +"myfile2").length());
 		deleteMetadata();
 	}
 
