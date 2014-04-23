@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.security.Security;
 
 import javax.net.ssl.SSLServerSocket;
@@ -28,8 +29,9 @@ public class SyncBoxServer {
 	 * 
 	 */
 	private boolean clientConnected;
-	private String syncBoxDir = "testfilesystem\\server\\syncbox\\";
-	private String metaDir = "testfilesystem\\server\\";
+	private String userEmail;
+	private String syncBoxDir;
+	private String metaDir = "testfilesystem/server/";
 
 	DataInputStream dis;
 	DataOutputStream outToClient;
@@ -38,10 +40,7 @@ public class SyncBoxServer {
 	SSLSocket clientSocket;
 	public void run (int port) throws Exception{
 		boolean serving = true;
-		// Registering the JSSE provider
 		Security.addProvider(new Provider());
-
-		//Specifying the Keystore details
 		System.setProperty("javax.net.ssl.keyStore","syncboxKey.jks");
 		System.setProperty("javax.net.ssl.keyStorePassword","password");
 		
@@ -57,6 +56,37 @@ public class SyncBoxServer {
 			inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			dis = new DataInputStream(clientSocket.getInputStream());
 			clientConnected = true;
+			
+			//authenticate
+			System.out.println("Checking log in credentials");
+			userEmail = inFromClient.readLine();
+			String userPassword = inFromClient.readLine();
+			
+			Boolean verified = DatabaseCheck.isUser(userEmail, userPassword);
+			
+			if (verified){
+				outToClient.writeBytes("welcome\n");
+				System.out.println("Valid Credentials");
+				//make userFolder if needed
+				String[] parts = userEmail.split("@");
+				String userPath =  parts[0]+"/";
+				syncBoxDir = "testfilesystem/server/"+userPath+"syncbox/";
+				metaDir = "testfilesystem/server/"+userPath;
+				File f = new File(syncBoxDir);
+				if (!f.exists() || !f.isDirectory()){
+					f.mkdirs();
+				}
+
+			}
+			else{
+				System.out.println("Invalid Credentials connection refused");
+				outToClient.writeBytes("non-authorised user\n");
+				clientConnected = false;
+				outToClient.writeBytes("Ending connection\n");
+				clientSocket.close();
+				System.out.println("Exiting\n\n");
+				
+			}
 
 			while (clientConnected){
 				String clientCommand = inFromClient.readLine();

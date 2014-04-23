@@ -39,6 +39,8 @@ import client.security.PasswordBasedEncryption;
 public class ClientControl {
 
 	private char[] masterPassword = "soup".toCharArray();
+	private String connectionPassword = "pass";
+	private String email = "joe@joe.com";
 
 	private static final String serverAddress = "localhost";
 	//private static final String serverAddress = "syncbox.no-ip.biz";
@@ -52,11 +54,10 @@ public class ClientControl {
 	 * Constructor
 	 * Checks the server has metadata
 	 * otherwise it initialises a synchronisation with empty meta files
-	 * @param serverAddress
-	 * @param serverPort
 	 * @throws Exception
 	 */
 	public ClientControl() throws Exception{
+		//add user info in constructor
 		
 		if (!isOnServer(Path.SERVER_METADATA)){
 			initialise();
@@ -74,7 +75,7 @@ public class ClientControl {
 	 * all other files will have secure pseudo random passwords attributed.
 	 * 
 	 * 
-	 * @param password
+	 * 
 	 */
 	public void synchronise(){
 		System.out.println("Synchronising folders");
@@ -96,6 +97,16 @@ public class ClientControl {
 			outToServer = new DataOutputStream(clientSocket.getOutputStream());
 			inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			dis = new DataInputStream(clientSocket.getInputStream());
+			
+			//authentication
+			System.out.println("Sending log in credentials");
+			outToServer.writeBytes(email+"\n");
+			outToServer.flush();
+			outToServer.writeBytes(connectionPassword+"\n");
+			outToServer.flush();
+			String response = inFromServer.readLine();
+			if (response.equals("welcome")){System.out.println("login successful");}
+			else{ throw new Exception("invalid credentials");}
 		}
 		catch (Exception e){e.printStackTrace(); System.out.println("connection failed");}
 	}
