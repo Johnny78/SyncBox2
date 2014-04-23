@@ -56,12 +56,28 @@ public class ClientControl {
 	 * otherwise it initialises a synchronisation with empty meta files
 	 * @throws Exception
 	 */
-	public ClientControl() throws Exception{
-		//add user info in constructor
+	public ClientControl(String email, String password, char[] masterPassword) throws Exception{
+		this.email = email;
+		this.connectionPassword = password;
+		this.masterPassword = masterPassword;
+
+		File f = new File(Path.SYNCBOX);
+		if (!f.exists() || !f.isDirectory()){
+			f.mkdirs();
+			File f1 = new File(Path.CLIENT);
+			f1.mkdirs();
+			Runtime.getRuntime().exec("attrib +H "+f1.getAbsolutePath());
+			File f2 = new File(Path.TEMP);
+			f2.mkdirs();
+			Runtime.getRuntime().exec("attrib +H "+f2.getAbsolutePath());
+		}
 		
 		if (!isOnServer(Path.SERVER_METADATA)){
 			initialise();
 		}
+		
+
+		
 	}
 
 	/**

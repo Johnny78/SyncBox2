@@ -13,6 +13,7 @@ import java.util.Arrays;
  */
 public class PassPrompt extends JPanel implements ActionListener {
 
+	private static final long serialVersionUID = 1L;
 	private JFrame parentFrame;
 	private JPasswordField passwordField;
 	private char[] password;
@@ -31,7 +32,7 @@ public class PassPrompt extends JPanel implements ActionListener {
         passwordField.setActionCommand("ok");
         passwordField.addActionListener(this);
  
-        JLabel label = new JLabel("Enter the password: ");
+        JLabel label = new JLabel("Enter the master password: ");
         label.setLabelFor(passwordField);
  
         JComponent buttonPane = createButton();
@@ -46,17 +47,8 @@ public class PassPrompt extends JPanel implements ActionListener {
         
         this.setOpaque(true); //content panes must be opaque
         parentFrame.setContentPane(this);
- 
-        //Make sure the focus goes to the right component
-        //whenever the frame is initially given the focus.
-//        parentFrame.addWindowListener(new WindowAdapter() {
-//            public void windowActivated(WindowEvent e) {
-//                newContentPane.resetFocus();
-//            }
-//        });
- 
-        //Display the window.
         parentFrame.pack();
+        parentFrame.setLocationRelativeTo(null);
         parentFrame.setVisible(true);
 	}
 	

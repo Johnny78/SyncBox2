@@ -48,9 +48,11 @@ public class MetadataTool {
 				else{
 				actions.put(fm, ActionType.IMPORT);
 				System.out.println("file "+fm.getName()+" does not exist on client yet");
+				seenFiles.add(fm);
 				}
 			}
 		}
+		writeArray(seenFiles, Path.CLIENT + Path.SEEN_METADATA);
 		for (FileMetadata fm : clientFiles){
 			if (deletedFiles.contains(fm)){
 				actions.put(fm,  ActionType.DELETEFROMCLIENT);

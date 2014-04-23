@@ -16,7 +16,11 @@ import javax.swing.*;
  *
  */
 public class SyncBoxTaskBar {
-    public static void main(String[] args) {
+	
+	private ClientControl clientControl;
+	
+    public  SyncBoxTaskBar(ClientControl cc){
+    	clientControl = cc;   	
         /* Use an appropriate Look and Feel */
         try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
@@ -41,7 +45,7 @@ public class SyncBoxTaskBar {
         });
     }
     
-    private static void createAndShowGUI() {
+    private void createAndShowGUI() {
         //Check the SystemTray support
         if (!SystemTray.isSupported()) {
             System.out.println("SystemTray is not supported");
@@ -49,7 +53,7 @@ public class SyncBoxTaskBar {
         }
         final PopupMenu popup = new PopupMenu();
         final TrayIcon trayIcon =
-                new TrayIcon(createImage("images/sync.png", "tray icon"));
+                new TrayIcon(createImage("images/syncbox.png", "tray icon"));
         final SystemTray tray = SystemTray.getSystemTray();
         trayIcon.setImageAutoSize(true);
         
@@ -74,10 +78,8 @@ public class SyncBoxTaskBar {
                 
             	trayIcon.displayMessage("SyncBox information",
                         "Syncing your files...", TrayIcon.MessageType.NONE);
-                ClientControl client;
 				try {
-					client = new ClientControl ();
-					client.synchronise("password".toCharArray());
+					clientControl.synchronise();
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

@@ -31,7 +31,7 @@ public class SyncBoxServer {
 	private boolean clientConnected;
 	private String userEmail;
 	private String syncBoxDir;
-	private String metaDir = "testfilesystem/server/";
+	private String metaDir;
 
 	DataInputStream dis;
 	DataOutputStream outToClient;
@@ -70,11 +70,13 @@ public class SyncBoxServer {
 				//make userFolder if needed
 				String[] parts = userEmail.split("@");
 				String userPath =  parts[0]+"/";
-				syncBoxDir = "testfilesystem/server/"+userPath+"syncbox/";
-				metaDir = "testfilesystem/server/"+userPath;
+				syncBoxDir = "server/"+userPath+"syncbox/";
+				metaDir = "server/"+userPath+"meta/";
 				File f = new File(syncBoxDir);
 				if (!f.exists() || !f.isDirectory()){
 					f.mkdirs();
+					File f1 = new File(metaDir);
+					f1.mkdirs();
 				}
 
 			}
