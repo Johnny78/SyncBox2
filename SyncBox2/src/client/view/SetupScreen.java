@@ -75,7 +75,7 @@ import javax.swing.text.StyleContext;
 	        linkStyle.addAttribute(StyleConstants.FontFamily, "sans-serif");
 	        StyleConstants.setAlignment(linkStyle, StyleConstants.ALIGN_CENTER);
 	        linkStyle.addAttribute(StyleConstants.Bold, new Boolean(true));
-	        String link = "                                                              http://SyncBox.no-ip.biz:8080/syncbox/";       		
+	        String link = "                                                              http://syncbox.no-ip.biz:8080/syncboxweb/";       		
 	        try { doc.insertString(doc.getLength(), link, linkStyle); }
 	        catch (BadLocationException e){}
 

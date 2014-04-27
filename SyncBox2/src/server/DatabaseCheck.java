@@ -1,5 +1,6 @@
 package server;
 
+import server.security.jBCrypt.BCrypt;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -20,17 +21,18 @@ public class DatabaseCheck {
 	public static boolean isUser(String email, String pass) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
 		PreparedStatement preparedStatement = null;
 		Connection dbConnection = null;
-		String selectSQL = "SELECT EMAIL, PASSWORD FROM SYNCBOXUSER WHERE EMAIL='"+email+"' AND PASSWORD = '"+pass+"'";
-
+		
 		try {
 			dbConnection = getConnection();
+			String selectSQL = "SELECT * FROM SYNCBOXUSER WHERE EMAIL='"+email+"'";			
 			preparedStatement = dbConnection.prepareStatement(selectSQL);
 			ResultSet rs = preparedStatement.executeQuery();			
-			if (!rs.next()){	//if database does not contain credentials
+			if (!rs.next()){	//if database does not contain email
 				return false;
 				}
 			else{
-				return true;
+				String hashedPass = rs.getString("PASSWORD");			
+				return (BCrypt.checkpw(pass, hashedPass));	
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

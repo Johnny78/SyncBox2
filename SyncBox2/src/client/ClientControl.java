@@ -6,7 +6,6 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.Security;
@@ -38,12 +37,13 @@ import client.security.PasswordBasedEncryption;
  */
 public class ClientControl {
 
-	private char[] masterPassword = "soup".toCharArray();
-	private String connectionPassword = "pass";
-	private String email = "joe@joe.com";
+	private char[] masterPassword;
+	private String connectionPassword;
+	private String email;
 
-	private static final String serverAddress = "localhost";
+
 	//private static final String serverAddress = "syncbox.no-ip.biz";
+	private static final String serverAddress = "localhost";
 	private static final int serverPort = 20661;
 	private SSLSocket clientSocket;
 	private DataOutputStream outToServer;
@@ -66,10 +66,10 @@ public class ClientControl {
 			f.mkdirs();
 			File f1 = new File(Path.CLIENT);
 			f1.mkdirs();
-			Runtime.getRuntime().exec("attrib +H "+f1.getAbsolutePath());
+//			Runtime.getRuntime().exec("attrib +H "+f1.getAbsolutePath());
 			File f2 = new File(Path.TEMP);
 			f2.mkdirs();
-			Runtime.getRuntime().exec("attrib +H "+f2.getAbsolutePath());
+//			Runtime.getRuntime().exec("attrib +H "+f2.getAbsolutePath());
 		}
 		
 		if (!isOnServer(Path.SERVER_METADATA)){

@@ -1,13 +1,28 @@
 package client.view;
 
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.AWTException;
+import java.awt.Image;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Paths;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import client.ClientControl;
-
-import javax.swing.*;
+import client.constants.Path;
+import client.fileSystem.WatchDir;
 
 /**
  * Displays an icon in the users taskbar
@@ -43,6 +58,14 @@ public class SyncBoxTaskBar {
                 createAndShowGUI();
             }
         });
+        String path = Path.SYNCBOX;
+
+        try {       	
+        	new Thread(new WatchDir(Paths.get(path), cc)).start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
     }
     
     private void createAndShowGUI() {
@@ -58,10 +81,12 @@ public class SyncBoxTaskBar {
         trayIcon.setImageAutoSize(true);
         
         // Create a popup menu components
+        MenuItem syncItem = new MenuItem("Synchronise");
         MenuItem aboutItem = new MenuItem("About");
         MenuItem exitItem = new MenuItem("Exit");
         
         //Add components to popup menu
+        popup.add(syncItem);
         popup.add(aboutItem);
         popup.add(exitItem);
         trayIcon.setPopupMenu(popup);
@@ -88,10 +113,28 @@ public class SyncBoxTaskBar {
             }
         });
         
+        syncItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                
+            	trayIcon.displayMessage("SyncBox information",
+                        "Syncing your files...", TrayIcon.MessageType.NONE);
+				try {
+					clientControl.synchronise();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+        		
+            }
+        });
+        
         aboutItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(null,
-                        "SyncBox is a secure cloud synchronisation solution.");
+                        "SyncBox is a secure cloud backup program.\nVisit our website for more information:\nhttp://syncbox.no-ip.biz:8080/syncboxweb/  ");
+                JFrame frame = new JFrame("SyncBox password");
+        		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        		//new Thread(new ConsolePane()).start();       		
             }
         });
         

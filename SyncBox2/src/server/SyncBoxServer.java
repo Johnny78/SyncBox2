@@ -8,10 +8,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.nio.file.Files;
 import java.security.Security;
 
 import javax.net.ssl.SSLServerSocket;
@@ -30,6 +26,7 @@ public class SyncBoxServer {
 	 */
 	private boolean clientConnected;
 	private String userEmail;
+	private String password;
 	private String syncBoxDir;
 	private String metaDir;
 
@@ -41,8 +38,9 @@ public class SyncBoxServer {
 	public void run (int port) throws Exception{
 		boolean serving = true;
 		Security.addProvider(new Provider());
-		System.setProperty("javax.net.ssl.keyStore","syncboxKey.jks");
-		System.setProperty("javax.net.ssl.keyStorePassword","password");
+		//System.setProperty("javax.net.ssl.keyStore","/usr/local/syncbox/syncboxStore.jks");
+		System.setProperty("javax.net.ssl.keyStore","syncboxStore.jks");
+		System.setProperty("javax.net.ssl.keyStorePassword","syncboxpwd");
 		
 		SSLServerSocketFactory sslServerSocketfactory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();	
 		welcomeSocket = (SSLServerSocket)sslServerSocketfactory.createServerSocket(port);
@@ -60,28 +58,26 @@ public class SyncBoxServer {
 			//authenticate
 			System.out.println("Checking log in credentials");
 			userEmail = inFromClient.readLine();
-			String userPassword = inFromClient.readLine();
+			password = inFromClient.readLine();
 			
-			Boolean verified = DatabaseCheck.isUser(userEmail, userPassword);
+			Boolean verified = DatabaseCheck.isUser(userEmail, password);
 			
 			if (verified){
 				outToClient.writeBytes("welcome\n");
-				System.out.println("Valid Credentials");
+				System.out.println("Valid Credentials"+ userEmail +"with password:"+password);
 				//make userFolder if needed
 				String[] parts = userEmail.split("@");
 				String userPath =  parts[0]+"/";
 				syncBoxDir = "server/"+userPath+"syncbox/";
-				metaDir = "server/"+userPath+"meta/";
+				metaDir = "server/"+userPath;
 				File f = new File(syncBoxDir);
 				if (!f.exists() || !f.isDirectory()){
 					f.mkdirs();
-					File f1 = new File(metaDir);
-					f1.mkdirs();
 				}
 
 			}
 			else{
-				System.out.println("Invalid Credentials connection refused");
+				System.out.println("Invalid Credentials: "+ userEmail +"\nwith password:"+password);
 				outToClient.writeBytes("non-authorised user\n");
 				clientConnected = false;
 				outToClient.writeBytes("Ending connection\n");
@@ -124,7 +120,6 @@ public class SyncBoxServer {
 					break;
 
 				case "is on server":
-					boolean b = false;
 					fileName = inFromClient.readLine();
 					f = new File(syncBoxDir + fileName);
 					File fi = new File (metaDir + fileName);
