@@ -1,4 +1,4 @@
-package client.security;
+package client.model.security;
 
 import java.io.FileInputStream;
 import java.security.MessageDigest;

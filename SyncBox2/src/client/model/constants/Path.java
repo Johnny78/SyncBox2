@@ -1,4 +1,4 @@
-package client.constants;
+package client.model.constants;
 
 public class Path {
 	public static final String HOME = System.getProperty("user.home")+"/";
@@ -6,7 +6,7 @@ public class Path {
 	public static final String EXTENTION = ".aes";
 	public static final String CLIENT = HOME+"SyncBox2/meta/";
 	public static final String TEMP = HOME+"SyncBox2/temp/";
-	public static final String SYNCBOX = DESK + "SyncBox/";
+	public static String SYNCBOX;
 	public static final String CLIENT_METADATA = "client-metadata.ser";
 	public static final String SERVER_METADATA = "server-metadata.ser";
 	public static final String DELETED_METADATA = "deleted-metadata.ser";

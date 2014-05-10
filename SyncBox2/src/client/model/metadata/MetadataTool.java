@@ -1,4 +1,4 @@
-package client.metadata;
+package client.model.metadata;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,23 +10,25 @@ import java.util.HashMap;
 
 import javax.crypto.SecretKey;
 
-import client.constants.ActionType;
-import client.constants.Path;
-
+import client.model.security.*;
+import client.model.constants.ActionType;
+import client.model.constants.Path;
+import client.model.metadata.FileMetadata;
 /**
- * This class deals with generating, updating and comparing metadata
+ * This class deals with generating, updating and comparing meta-data
  * @author John
  *
  */
 public class MetadataTool {
 
 	/**
-	 * compares two metadata files to find necessary sync actions
+	 * compares two lists of meta-data files to find necessary sync actions
 	 * @param serverFiles
 	 * @param clientFiles
 	 * @return
 	 */
 	public static HashMap<FileMetadata, ActionType> compare(){
+		System.out.println("Comparing server and client metadata...");
 		ArrayList<FileMetadata> serverFiles = readArray(Path.CLIENT + Path.SERVER_METADATA);
 		ArrayList<FileMetadata> clientFiles = readArray(Path.CLIENT + Path.CLIENT_METADATA);
 		ArrayList<FileMetadata> deletedFiles = readArray(Path.CLIENT + Path.DELETED_METADATA);
@@ -63,6 +65,7 @@ public class MetadataTool {
 				System.out.println("file "+fm.getName()+" does not exist on the server yet");
 			}
 		}
+		System.out.println("");
 		return actions;
 	}
 
@@ -116,11 +119,11 @@ public class MetadataTool {
 		String hash;
 		SecretKey password;
 		//get hash
-		hash = client.security.HashMd5.generateFileHash(f.getAbsolutePath());	
+		hash = HashMd5.generateFileHash(f.getAbsolutePath());	
 		//make password
-		password = client.security.PasswordBasedEncryption.genPass();
+		password = PasswordBasedEncryption.genPass();
 		//make cipherName
-		cipherName = client.security.HashMd5.generateNameHash(fileName+hash) + Path.EXTENTION;
+		cipherName = HashMd5.generateNameHash(fileName+hash) + Path.EXTENTION;
 		FileMetadata fm = new FileMetadata(fileName, cipherName, hash, password);
 		return fm;
 	}
@@ -131,16 +134,17 @@ public class MetadataTool {
 	 * if no match make new metadata object and add it to seen files and client metadata
 	 */
 	public static void updateClientMetadata(){
+		System.out.println("Updating client metadata...");
 		ArrayList<FileMetadata> seenFiles = readArray(Path.CLIENT + Path.SEEN_METADATA);
 		ArrayList<FileMetadata> clientMeta = new ArrayList<FileMetadata>();
 					
 		File syncBox = new File(Path.SYNCBOX);
 		File[] files = syncBox.listFiles();        
 		for (File f : files){
-			FileMetadata tempFM = new FileMetadata(f.getName(), client.security.HashMd5.generateFileHash(f.getAbsolutePath()));
+			FileMetadata tempFM = new FileMetadata(f.getName(), HashMd5.generateFileHash(f.getAbsolutePath()));
 			if (seenFiles.contains(tempFM)){
 				clientMeta.add(seenFiles.get(seenFiles.indexOf(tempFM)));
-				System.out.println("copying seen metadata from file "+ seenFiles.get(seenFiles.indexOf(tempFM)).getName());
+				System.out.println("file "+ seenFiles.get(seenFiles.indexOf(tempFM)).getName()+ " unchanged");
 			}
 			else{
 				FileMetadata fm = generateMetadata(f.getName());
@@ -151,6 +155,7 @@ public class MetadataTool {
 		}
 		writeArray(seenFiles, Path.CLIENT + Path.SEEN_METADATA);
 		writeArray(clientMeta, Path.CLIENT + Path.CLIENT_METADATA);
+		System.out.println("");
 	}
 
 }

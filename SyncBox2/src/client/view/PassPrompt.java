@@ -63,7 +63,6 @@ public class PassPrompt extends JPanel implements ActionListener {
 	
 	public void close(){
 		parentFrame.setVisible(false);
-		Arrays.fill(password,'0');	//destroy password record
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {

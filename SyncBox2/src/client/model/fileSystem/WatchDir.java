@@ -1,4 +1,4 @@
-package client.fileSystem;
+package client.model.fileSystem;
 
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
@@ -14,7 +14,7 @@ import java.nio.file.WatchService;
 import java.util.HashMap;
 import java.util.Map;
 
-import client.ClientControl;
+import client.controller.SyncControl;
 
 /**
  * watch a directory for changes to files.
@@ -26,7 +26,7 @@ public class WatchDir extends Thread{
     private final Map<WatchKey,Path> keys;
     private boolean trace = false;
     
-    private ClientControl cc;
+    private SyncControl sc;
     
     @SuppressWarnings("unchecked")
     static <T> WatchEvent<T> cast(WatchEvent<?> event) {
@@ -36,8 +36,8 @@ public class WatchDir extends Thread{
     /**
      * Creates a WatchService and registers the given directory
      */
-    public WatchDir(Path dir, ClientControl cc) throws IOException {
-    	this.cc = cc;
+    public WatchDir(Path dir, SyncControl sc) throws IOException {
+    	this.sc = sc;
         this.watcher = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<WatchKey,Path>();
             register(dir);
@@ -67,7 +67,7 @@ public class WatchDir extends Thread{
 
 
     /**
-     * Process all events for keys queued to the watcher
+     * Process event by synchronising
      */
     public void run() {
         for (;;) {
@@ -91,8 +91,8 @@ public class WatchDir extends Thread{
 				e.printStackTrace();
 			}
 
-            System.out.println(key.pollEvents().get(0).kind().name());
-            cc.synchronise();	//sync the changes
+            System.out.println("File System change detected: "+ key.pollEvents().get(0).kind().name());
+            sc.synchronise();	//sync the changes
 
             // reset key and remove from set if directory no longer accessible
             boolean valid = key.reset();

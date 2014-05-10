@@ -20,9 +20,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import client.ClientControl;
-import client.constants.Path;
-import client.fileSystem.WatchDir;
+
+import client.model.constants.Path;
+import client.controller.SyncControl;
+import client.model.fileSystem.WatchDir;
 
 /**
  * Displays an icon in the users taskbar
@@ -32,10 +33,11 @@ import client.fileSystem.WatchDir;
  */
 public class SyncBoxTaskBar {
 	
-	private ClientControl clientControl;
+	private SyncControl syncControl;
+	private TrayIcon trayIcon;
 	
-    public  SyncBoxTaskBar(ClientControl cc){
-    	clientControl = cc;   	
+    public  SyncBoxTaskBar(SyncControl sc){
+    	syncControl = sc;   	
         /* Use an appropriate Look and Feel */
         try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
@@ -61,7 +63,7 @@ public class SyncBoxTaskBar {
         String path = Path.SYNCBOX;
 
         try {       	
-        	new Thread(new WatchDir(Paths.get(path), cc)).start();
+        	new Thread(new WatchDir(Paths.get(path), syncControl)).start();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -75,7 +77,7 @@ public class SyncBoxTaskBar {
             return;
         }
         final PopupMenu popup = new PopupMenu();
-        final TrayIcon trayIcon =
+        trayIcon =
                 new TrayIcon(createImage("images/syncbox.png", "tray icon"));
         final SystemTray tray = SystemTray.getSystemTray();
         trayIcon.setImageAutoSize(true);
@@ -104,7 +106,7 @@ public class SyncBoxTaskBar {
             	trayIcon.displayMessage("SyncBox information",
                         "Syncing your files...", TrayIcon.MessageType.NONE);
 				try {
-					clientControl.synchronise();
+					syncControl.synchronise();
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -113,13 +115,14 @@ public class SyncBoxTaskBar {
             }
         });
         
+              
         syncItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 
             	trayIcon.displayMessage("SyncBox information",
                         "Syncing your files...", TrayIcon.MessageType.NONE);
 				try {
-					clientControl.synchronise();
+					syncControl.synchronise();
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -145,6 +148,11 @@ public class SyncBoxTaskBar {
                 System.exit(0);
             }
         });
+    }
+    
+    public void informUser(){
+    	trayIcon.displayMessage("SyncBox information",
+                "Syncing your files...", TrayIcon.MessageType.NONE);
     }
     
     //Obtain the image URL

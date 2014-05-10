@@ -1,11 +1,11 @@
-package client.metadata;
+package client.model.metadata;
 
 import java.io.Serializable;
 
 import javax.crypto.SecretKey;
 
 /**
- * This class hold information about files ie meta-data
+ * This class creates objects that hold information about files ie meta-data
  * @author John
  *
  */
